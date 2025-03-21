@@ -32,6 +32,8 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter
             throws ServletException, IOException
     {
         LoginUser loginUser = tokenService.getLoginUser(request);
+        String url = request.getRequestURI();
+        logger.info("url: {"+url+"}");
         if (StringUtils.isNotNull(loginUser) && StringUtils.isNull(SecurityUtils.getAuthentication()))
         {
             tokenService.verifyToken(loginUser);
