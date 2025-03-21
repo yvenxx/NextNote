@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-    <groupId>com.ruoyi</groupId>
+    <groupId>cn.yven</groupId>
     <artifactId>NextNote</artifactId>
     <version>3.8.9</version>
 
-    <name>ruoyi</name>
-    <url>http://www.ruoyi.vip</url>
-    <description>若依管理系统</description>
+    <name>NextNote</name>
+    <url>http://www.yvenxx.cn</url>
+    <description>NextNote管理系统</description>
     
     <properties>
         <ruoyi.version>3.8.9</ruoyi.version>
@@ -185,36 +185,41 @@
 
             <!-- 定时任务-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-quartz</artifactId>
+                <groupId>cn.yven</groupId>
+                <artifactId>NextNote-quartz</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 
             <!-- 代码生成-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-generator</artifactId>
+                <groupId>cn.yven</groupId>
+                <artifactId>NextNote-generator</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 
             <!-- 核心模块-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-framework</artifactId>
+                <groupId>cn.yven</groupId>
+                <artifactId>NextNote-framework</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 
             <!-- 系统模块-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-system</artifactId>
+                <groupId>cn.yven</groupId>
+                <artifactId>NextNote-system</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 
             <!-- 通用工具-->
             <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-common</artifactId>
+                <groupId>cn.yven</groupId>
+                <artifactId>NextNote-common</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.yven</groupId>
+                <artifactId>NextNote-note</artifactId>
                 <version>${ruoyi.version}</version>
             </dependency>
 
@@ -222,12 +227,13 @@
     </dependencyManagement>
 
     <modules>
-        <module>ruoyi-admin</module>
-        <module>ruoyi-framework</module>
-        <module>ruoyi-system</module>
-        <module>ruoyi-quartz</module>
-        <module>ruoyi-generator</module>
-        <module>ruoyi-common</module>
+        <module>NextNote-admin</module>
+        <module>NextNote-framework</module>
+        <module>NextNote-system</module>
+        <module>NextNote-quartz</module>
+        <module>NextNote-generator</module>
+        <module>NextNote-common</module>
+        <module>NextNote-note</module>
     </modules>
     <packaging>pom</packaging>
 
