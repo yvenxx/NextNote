@@ -2,6 +2,7 @@ package cn.yven.note.service.impl;
 
 import java.util.List;
 import cn.yven.common.utils.DateUtils;
+import cn.yven.common.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import cn.yven.note.mapper.TCategoryMapper;
@@ -54,6 +55,7 @@ public class TCategoryServiceImpl implements ITCategoryService
     public int insertTCategory(TCategory tCategory)
     {
         tCategory.setCreateTime(DateUtils.getNowDate());
+        tCategory.setCreateBy(SecurityUtils.getUsername());
         return tCategoryMapper.insertTCategory(tCategory);
     }
 
@@ -67,6 +69,7 @@ public class TCategoryServiceImpl implements ITCategoryService
     public int updateTCategory(TCategory tCategory)
     {
         tCategory.setUpdateTime(DateUtils.getNowDate());
+        tCategory.setUpdateBy(SecurityUtils.getUsername());
         return tCategoryMapper.updateTCategory(tCategory);
     }
 
