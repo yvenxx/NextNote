@@ -30,12 +30,13 @@
                     size="mini"
                     @blur="handleNameConfirm(data)"
                     @keyup.enter.native="handleNameConfirm(data)"
+                    @click.native.stop
                     ref="nameInput"
                   ></el-input>
                 </div>
                 
                 <!-- 右侧操作按钮 -->
-                <div class="node-actions">
+                <div class="node-actions" @click.stop>
                   <el-button
                     v-if="data.type === 'category'"
                     type="text"
@@ -47,7 +48,6 @@
                   <el-dropdown
                     v-else
                     trigger="click"
-                    @click.stop
                     @command="handleCommand($event, data, node)"
                   >
                     <el-button type="text" size="mini">
@@ -72,7 +72,7 @@
         <div class="right-panel">
           <el-form ref="form" :model="form" :rules="rules" label-width="80px" v-show="editorVisible">
             <el-row >
-              <el-col :span="20">
+              <el-col :span="24">
                 <el-button
                   size="mini"
                   @click="submitForm"
@@ -81,9 +81,9 @@
                 >
                 <div id="vditor"></div>
               </el-col>
-              <el-col :span="4" style="margin-top: 15px">
+              <!-- <el-col :span="4" style="margin-top: 15px">
                 <div class="right-panel">大纲</div>
-              </el-col>
+              </el-col> -->
             </el-row>
             <!-- <el-form-item label="" prop="title">
               <el-input v-model="form.title" placeholder="请输入标题" />
@@ -338,12 +338,22 @@ export default {
     },
     // 处理节点点击
     handleNodeClick(data) {
+      // 如果节点正在编辑中，不触发点击事件
+      if (data.isEditing) {
+        return;
+      }
+      
       // 处理节点点击事件，加载对应的文章内容
       if (data.type === "article") {
         this.contentEditor = new Vditor("vditor", {
-          height: "100%",
+          height: "850px",
           width: "100%",
           theme: "light",
+          outline: {
+            enable: true,
+            position: "right",
+          },
+          theme: "ant-design",
         });
         getArticle(data.id).then((response) => {
           this.contentEditor.setValue(response.data.description || "");
@@ -351,14 +361,17 @@ export default {
         this.form.id = data.id;
         this.form.description = data.description;
         this.editorVisible = true;
+        // 当前节点颜色标识
+        this.$set(data, 'isActive', true);
       }
     },
-    // 处理下拉菜单命令 TODO 点重命名没有变成输入框
+    // 处理下拉菜单命令
     handleCommand(command, data, node) {
       if (command === 'rename') {
-        // 设置初始名称和编辑状态
-        data.name = data.title || node.label;
-        data.isEditing = true;
+        // 使用 Vue.set 或 this.$set 来确保响应式更新
+        this.$set(data, 'name', data.title || node.label);
+        this.$set(data, 'isEditing', true);
+        
         this.$nextTick(() => {
           const inputs = this.$refs.nameInput;
           if (inputs && inputs.length > 0) {
@@ -371,10 +384,23 @@ export default {
     },
     // 处理重命名确认
     handleNameConfirm(data) {
+      // 防止重复提交
+      if (data.isSubmitting) {
+        return;
+      }
+
       if (!data.name || data.name.trim() === '') {
         this.$modal.msgError("名称不能为空");
         return;
       }
+
+      // 如果名称没有改变，直接关闭编辑状态
+      if (data.name === data.title) {
+        this.$set(data, 'isEditing', false);
+        return;
+      }
+
+      this.$set(data, 'isSubmitting', true);
 
       if (data.isNew) {
         // 处理新添加的文章
@@ -384,14 +410,11 @@ export default {
         };
         addArticle(params).then(response => {
           this.$modal.msgSuccess("添加成功");
-          Object.assign(data, {
-            id: response.data.id,
-            isNew: false,
-            isEditing: false,
-            title: data.name // 确保title也被更新
-          });
+          this.$set(data, 'id', response.data.id);
+          this.$set(data, 'isNew', false);
+          this.$set(data, 'isEditing', false);
+          this.$set(data, 'title', data.name);
         }).catch(() => {
-          // 如果添加失败，从父节点的children中移除
           const parent = this.findParentNode(this.categoryList, data);
           if (parent && parent.children) {
             const index = parent.children.findIndex(item => item === data);
@@ -399,6 +422,8 @@ export default {
               parent.children.splice(index, 1);
             }
           }
+        }).finally(() => {
+          this.$set(data, 'isSubmitting', false);
         });
       } else {
         // 处理重命名
@@ -408,13 +433,17 @@ export default {
         };
         updateArticle(params).then(() => {
           this.$modal.msgSuccess("更新成功");
-          data.title = data.name; // 更新显示的标题
-          data.isEditing = false;
+          this.$set(data, 'title', data.name);
+          this.$set(data, 'isEditing', false);
         }).catch(() => {
-          data.name = data.title; // 恢复原来的名称
-          data.isEditing = false;
+          this.$set(data, 'name', data.title);
+          this.$set(data, 'isEditing', false);
+        }).finally(() => {
+          this.$set(data, 'isSubmitting', false);
         });
       }
+      
+      this.getCategoryList();
     },
     // 添加新文章
     handleAddArticle(category) {
@@ -471,6 +500,7 @@ export default {
   padding: 20px;
   height: calc(100vh - 120px);
   overflow: auto;
+  font-size: 14px;
 }
 
 .custom-tree-node {
