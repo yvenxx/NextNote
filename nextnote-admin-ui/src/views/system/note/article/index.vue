@@ -110,8 +110,8 @@ import {
   delArticle,
   addArticle,
   updateArticle,
-} from "@/api/note/article";
-import { listCategory } from "@/api/note/category";
+} from "@/api/system/note/article";
+import { listCategory } from "@/api/system/note/category";
 import Vditor from "vditor";
 import "vditor/dist/index.css";
 

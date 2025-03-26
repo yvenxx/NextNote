@@ -2,6 +2,7 @@ package cn.yven.note.service;
 
 import java.util.List;
 import cn.yven.note.domain.TCategory;
+import cn.yven.note.domain.vo.TCategoryVO;
 
 /**
  * 分类Service接口
@@ -26,6 +27,14 @@ public interface ITCategoryService
      * @return 分类集合
      */
     public List<TCategory> selectTCategoryList(TCategory tCategory);
+
+    /**
+     * 查询分类列表
+     * 
+     * @param tCategory 分类
+     * @return 分类集合
+     */
+    public List<TCategoryVO> selectTCategoryAndCountList(TCategory tCategory);
 
     /**
      * 新增分类

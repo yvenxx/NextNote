@@ -2,6 +2,8 @@ package cn.yven.note.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import cn.yven.note.domain.vo.TCategoryVO;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,6 +47,18 @@ public class TCategoryController extends BaseController
         List<TCategory> list = tCategoryService.selectTCategoryList(tCategory);
         return getDataTable(list);
     }
+
+    /**
+     * home页面查询分类列表
+     * @param tCategory
+     */
+    @PreAuthorize("permitAll()")
+    @GetMapping("/public/list-category")  // 改为更明确的路径
+    public AjaxResult categoryAndCountList(TCategory tCategory) {
+        List<TCategoryVO> list = tCategoryService.selectTCategoryAndCountList(tCategory);
+        return AjaxResult.success(list);
+    }
+
 
     /**
      * 导出分类列表

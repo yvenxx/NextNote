@@ -36,8 +36,9 @@ public class TArticleController extends BaseController
 
     /**
      * 查询文章管理列表
+     * 无权限
      */
-    @PreAuthorize("@ss.hasPermi('note:article:list')")
+    @PreAuthorize("permitAll()")
     @GetMapping("/list")
     public TableDataInfo list(TArticle tArticle)
     {

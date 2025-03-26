@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import cn.yven.note.mapper.TCategoryMapper;
 import cn.yven.note.domain.TCategory;
+import cn.yven.note.domain.vo.TCategoryVO;
 import cn.yven.note.service.ITCategoryService;
 
 /**
@@ -43,6 +44,11 @@ public class TCategoryServiceImpl implements ITCategoryService
     public List<TCategory> selectTCategoryList(TCategory tCategory)
     {
         return tCategoryMapper.selectTCategoryList(tCategory);
+    }
+
+    @Override
+    public List<TCategoryVO> selectTCategoryAndCountList(TCategory tCategory) {
+        return tCategoryMapper.selectTCategoryAndCountList(tCategory);
     }
 
     /**

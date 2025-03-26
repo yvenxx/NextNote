@@ -2,6 +2,7 @@ package cn.yven.note.mapper;
 
 import java.util.List;
 import cn.yven.note.domain.TCategory;
+import cn.yven.note.domain.vo.TCategoryVO;
 
 /**
  * 分类Mapper接口
@@ -58,4 +59,6 @@ public interface TCategoryMapper
      * @return 结果
      */
     public int deleteTCategoryByIds(Long[] ids);
+
+    List<TCategoryVO> selectTCategoryAndCountList(TCategory tCategory);
 }
