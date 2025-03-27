@@ -114,6 +114,7 @@ import {
 import { listCategory } from "@/api/system/note/category";
 import Vditor from "vditor";
 import "vditor/dist/index.css";
+import { getToken } from "@/utils/auth";
 
 export default {
   name: "Article",
@@ -354,6 +355,37 @@ export default {
             position: "right",
           },
           theme: "ant-design",
+          upload:{
+            accept: "image/jpg,image/jpeg,image/png",
+            url: process.env.VUE_APP_BASE_API + "/common/upload",
+            fieldName: "file",
+            max: 2 * 1024 * 1024,
+            headers: {
+              'Authorization': 'Bearer ' + getToken()
+            },
+            linkToImgUrl: process.env.VUE_APP_BASE_API + "/common/upload",
+            filename(name){
+              return name;
+            },
+            format(files,responseText){
+              // 上传成功后，将图片回显到编辑器中
+              let response = JSON.parse(responseText);
+              if(response.code == 200){
+                return JSON.stringify({
+                  msg: response.msg,
+                  code: response.code,
+                  data:{
+                    errFiles: [],
+                    succMap:{
+                      [response.newFileName]: response.url
+                    }
+                  }
+                });
+              }else{
+                this.$message.error(response.msg);
+              }
+            },
+          }
         });
         getArticle(data.id).then((response) => {
           this.contentEditor.setValue(response.data.description || "");
