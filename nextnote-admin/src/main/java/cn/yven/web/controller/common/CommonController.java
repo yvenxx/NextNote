@@ -1,9 +1,19 @@
 package cn.yven.web.controller.common;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.qcloud.cos.COSClient;
+import com.qcloud.cos.ClientConfig;
+import com.qcloud.cos.auth.BasicCOSCredentials;
+import com.qcloud.cos.auth.COSCredentials;
+import com.qcloud.cos.model.PutObjectRequest;
+import com.qcloud.cos.model.PutObjectResult;
+import com.qcloud.cos.region.Region;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import cn.yven.common.config.RuoYiConfig;
+import cn.yven.common.config.CosConfig;
 import cn.yven.common.constant.Constants;
 import cn.yven.common.core.domain.AjaxResult;
 import cn.yven.common.utils.StringUtils;
@@ -34,6 +45,9 @@ public class CommonController
 
     @Autowired
     private ServerConfig serverConfig;
+
+    @Autowired
+    private CosConfig cosConfig;
 
     private static final String FILE_DELIMETER = ",";
 
@@ -66,6 +80,58 @@ public class CommonController
         catch (Exception e)
         {
             log.error("下载文件失败", e);
+        }
+    }
+
+    /**
+     * 腾讯云 cos 上传文件
+     */
+    @PostMapping("/upload-cos")
+    public AjaxResult uploadCosFile(MultipartFile file) throws Exception {
+        if (file == null) {
+            return AjaxResult.error("文件不能为空");
+        }
+        String originalFilename = file.getOriginalFilename();
+        String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+
+        Calendar cal = Calendar.getInstance();
+        int year = cal.get(Calendar.YEAR);
+        int month=cal.get(Calendar.MONTH);
+        int day=cal.get(Calendar.DATE);
+        try {
+            // 获取腾讯云 cos 配置
+            String accessKey = cosConfig.getAccessKey();
+            String secretKey = cosConfig.getSecretKey();
+            String bucketName = cosConfig.getBucketName();
+            String bucket = cosConfig.getBucket();
+            String path = cosConfig.getPath();
+            String prefix = cosConfig.getPrefix();
+
+            // 初始化 COS 客户端
+            COSCredentials credentials = new BasicCOSCredentials(accessKey, secretKey);
+            ClientConfig clientConfig = new ClientConfig(new Region(bucket));
+            COSClient cosClient = new COSClient(credentials, clientConfig);
+
+            // 上传文件
+            String key = prefix + "/" + year + "/" + month + "/" + day + "/" + UUID.randomUUID().toString() + suffix;
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, file.getInputStream(), null);
+            PutObjectResult putObjectResult = cosClient.putObject(putObjectRequest);
+            // 返回文件访问路径
+            String url = "https://" + path + prefix + "/" + year + "/" + month + "/" + day + "/" + key;
+
+            // 关闭 COS 客户端
+            cosClient.shutdown();
+
+            // 返回结果
+            AjaxResult ajax = AjaxResult.success();
+            ajax.put("url", url);
+            ajax.put("fileName", key);
+            ajax.put("newFileName", FileUtils.getName(key));
+            ajax.put("originalFilename", originalFilename);
+            return ajax;
+        } catch (Exception e) {
+            log.error("上传文件失败", e);
+            return AjaxResult.error(e.getMessage());
         }
     }
 
