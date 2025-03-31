@@ -117,7 +117,7 @@ public class CommonController
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, file.getInputStream(), null);
             PutObjectResult putObjectResult = cosClient.putObject(putObjectRequest);
             // 返回文件访问路径
-            String url = "https://" + path + prefix + "/" + year + "/" + month + "/" + day + "/" + key;
+            String url = path + key;
 
             // 关闭 COS 客户端
             cosClient.shutdown();
