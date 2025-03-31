@@ -34,7 +34,8 @@ export const constantRoutes = [
     path: '/',
     component: () => import('@/views/home/home'),
     name: 'Home',
-    meta: { title: '首页', icon: 'dashboard', affix: true }
+    meta: { title: '首页', icon: 'dashboard', affix: true },
+    isToken: false
   },
   {
     path: '/admin',
@@ -47,7 +48,24 @@ export const constantRoutes = [
         name: 'Dashboard',
         meta: { title: '首页', icon: 'dashboard', affix: true }
       }
-    ]
+    ],
+    hidden: true
+  },
+  {
+    path: '/category/:id',
+    component: () => import('@/views/home/category'),
+    name: 'CategoryDetail',
+    meta: { title: '分类详情', icon: 'dashboard', affix: false },
+    isToken: false,
+    hidden: true
+  },
+  {
+    path: '/article/:id',
+    component: () => import('@/views/home/article'),
+    name: 'ArticleDetail',
+    meta: { title: '文章详情', icon: 'dashboard', affix: false },
+    isToken: false,
+    hidden: true
   },
   {
     path: '/redirect',
