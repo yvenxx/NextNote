@@ -4,8 +4,8 @@
     <el-row class="main-container" :gutter="30" type="flex" justify="left">
         <el-col :offset="4" :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
             <h1>分类 : {{ category.name }}</h1>
-            <div v-for="article in articles" :key="article.id">
-                <a :href="'/article/' + article.id">{{ article.title }}</a>
+            <div v-for="article in articles" :key="article.id" style="padding-bottom: 10px;">
+                <a style="font-size: 18px;" :href="'/article/' + article.id">{{ article.title }}</a>
             </div>
         </el-col>
     </el-row>

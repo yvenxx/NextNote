@@ -9,7 +9,7 @@
       </div>
     </el-col>
     <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4" class="nav-links">
-      <a href="#" class="nav-item">关于</a>
+      <a href="/about" class="nav-item">关于</a>
       <a href="https://github.com/yvenxx/NextNote" target="_blank" class="nav-item">
         <img src="@/assets/images/github-mark.svg" alt="github" width="17" height="17" style="margin-top: 4px;"/>
       </a>
