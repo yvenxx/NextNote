@@ -357,13 +357,13 @@ export default {
           theme: "ant-design",
           upload:{
             accept: "image/jpg,image/jpeg,image/png",
-            url: process.env.VUE_APP_BASE_API + "/common/upload",
+            url: process.env.VUE_APP_BASE_API + "/common/upload-cos",
             fieldName: "file",
             max: 2 * 1024 * 1024,
             headers: {
               'Authorization': 'Bearer ' + getToken()
             },
-            linkToImgUrl: process.env.VUE_APP_BASE_API + "/common/upload",
+            linkToImgUrl: process.env.VUE_APP_BASE_API + "/common/upload-cos",
             filename(name){
               return name;
             },

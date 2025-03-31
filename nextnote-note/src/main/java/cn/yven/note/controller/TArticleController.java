@@ -2,6 +2,8 @@ package cn.yven.note.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import cn.yven.common.annotation.Anonymous;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,9 +38,8 @@ public class TArticleController extends BaseController
 
     /**
      * 查询文章管理列表
-     * 无权限
      */
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("@ss.hasPermi('note:article:list')")
     @GetMapping("/list")
     public TableDataInfo list(TArticle tArticle)
     {

@@ -1,34 +1,17 @@
 <template>
-  <div class="blog-layout">
+  <div class="home-container">
     <!-- 顶部导航 -->
-    <el-row class="nav-header" type="flex" justify="center" :gutter="30">
-      <el-col :offset="2" :xs="24" :sm="24" :md="14" :lg="14" :xl="14">
-        <div class="nav-left">
-          <div class="nav-brand">
-            <a href="/" style="text-decoration: none; color: #333;">{{ siteConfig.brand }}</a>
-          </div>
-          <div class="nav-subtitle">{{ siteConfig.subtitle }}</div>
-        </div>
-      </el-col>
-      <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5" class="nav-links">
-        <!-- <a href="#" class="nav-item">社区</a> -->
-        <a href="#" class="nav-item">关于</a>
-        <!-- <a href="/login" class="nav-item">登录</a> -->
-        <a href="https://github.com/yvenxx/NextNote" target="_blank" class="nav-item">
-          <img src="@/assets/images/github-mark.svg" alt="github" width="17" height="17" style="margin-top: 4px;"/>
-        </a>
-      </el-col>
-    </el-row>
+    <app-header />
 
-    <el-row class="main-container" :gutter="30" type="flex" justify="center">
+    <el-row class="main-container" :gutter="30" type="flex" justify="left">
       <!-- 文章列表区域-->
       <el-col
-        :offset="2"
+        :offset="4"
         :xs="24"
         :sm="24"
-        :md="14"
-        :lg="14"
-        :xl="14"
+        :md="12"
+        :lg="12"
+        :xl="12"
         class="content-col"
       >
         <div v-if="articles.length === 0" class="no-posts">
@@ -41,7 +24,7 @@
           class="post-item"
         >
           <div class="post-category">{{ categories.find(category => category.id === article.category).name }}</div>
-          <h2 class="post-title">{{ article.title }}</h2>
+          <a class="post-title" :href="'/article/' + article.id">{{ article.title }}</a>
           <div class="post-content" v-html="article.content"></div>
           <a class="read-more" :href="'/article/' + article.id">继续阅读</a>
           <div class="post-meta">
@@ -49,10 +32,19 @@
             <span class="post-date"><i class="el-icon-time"></i>&nbsp;{{ article.createTime }}</span>
           </div>
         </div>
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="total"
+          :page-size="pageSize"
+          :current-page="currentPage"
+          @current-change="handleCurrentChange"
+          class="pagination"
+        ></el-pagination>
       </el-col>
 
       <!-- 侧边栏 -->
-      <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5" class="sidebar-col">
+      <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4" class="sidebar-col">
         <!-- 搜索框 -->
         <el-input v-model="searchQuery" placeholder="搜索" class="search-box">
           <template #append>
@@ -91,21 +83,30 @@
         </div> -->
       </el-col>
     </el-row>
+    <app-footer />
   </div>
 </template>
 
 <script>
-import siteConfig from "@/config/site";
+import AppHeader from "@/components/Header.vue";
+import AppFooter from "@/components/Footer.vue";
 import { listArticle, listCategory } from "@/api/note/home";
 
 export default {
   name: "Home",
+  components: {
+    AppHeader,
+    AppFooter
+  },
   data() {
     return {
       articles: [],
       categories: [],
       searchQuery: "",
-      siteConfig: siteConfig,
+      // 分页相关数据
+      currentPage: 1,
+      pageSize: 15,
+      total: 0
     };
   },
   computed: {
@@ -114,10 +115,14 @@ export default {
     }
   },
   methods: {
-    async fetchArticle() {
+    async fetchArticle(page = 1) {
       try {
-        const response = await listArticle();
+        const response = await listArticle({
+          pageNum: page,
+          pageSize: this.pageSize
+        });
         this.articles = response.rows;
+        this.total = response.total;
       } catch (error) {
         console.error("获取文章列表失败:", error);
       }
@@ -132,61 +137,31 @@ export default {
     },
     getChildCategories(parentId) {
       return this.categories.filter(category => category.pid === parentId);
+    },
+    // 处理分页变化
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.fetchArticle(val);
+      // 滚动到页面顶部
+      window.scrollTo(0, 0);
     }
   },
   created() {
-    this.fetchArticle();
+    this.fetchArticle(this.currentPage);
     this.fetchCategories();
   },
 };
 </script>
 
 <style scoped>
-.blog-layout {
+.home-container {
   min-height: 100vh;
   background-color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-.nav-header {
-  padding: 1rem 0;
-  border-bottom: 1px solid #eee;
-  background: #fff;
-  width: 90%;
-  margin: 0 auto;
-}
-
-.nav-left {
-  display: flex;
-  flex-direction: column;
-}
-
-.nav-brand {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.nav-subtitle {
-  font-size: 0.8rem;
-  color: #666;
-}
-
-.nav-links {
-  font-size: 14px;
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.nav-item {
-  color: #333;
-  text-decoration: none;
-
-}
-
 .main-container {
-  width: 90%;
+  width: 100%;
   margin: 0 auto;
   margin-top: 20px;
   padding: 2rem 0;
@@ -274,5 +249,10 @@ export default {
 .post-category{
   font-size: 16px;
   color: #3d3d3d;
+}
+.pagination {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 </style>
