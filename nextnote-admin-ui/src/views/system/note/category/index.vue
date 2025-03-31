@@ -200,7 +200,7 @@ import {
   delCategory,
   addCategory,
   updateCategory,
-} from "@/api/note/category";
+} from "@/api/system/note/category";
 import { handleTree } from "@/utils/ruoyi";
 
 export default {

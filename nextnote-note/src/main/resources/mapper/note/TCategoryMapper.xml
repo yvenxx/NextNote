@@ -32,6 +32,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectTCategoryVo"/>
         where id = #{id}
     </select>
+    <select id="selectTCategoryAndCountList" resultType="cn.yven.note.domain.vo.TCategoryVO">
+        select t_category.id, t_category.pid, t_category.name, count(t_article.id) as count
+        from t_category
+        left join t_article on t_category.id = t_article.category
+        group by t_category.id
+    </select>
 
     <insert id="insertTCategory" parameterType="TCategory">
         insert into t_category

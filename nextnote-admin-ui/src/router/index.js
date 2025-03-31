@@ -31,6 +31,43 @@ import Layout from '@/layout'
 // 公共路由
 export const constantRoutes = [
   {
+    path: '/',
+    component: () => import('@/views/home/home'),
+    name: 'Home',
+    meta: { title: '首页', icon: 'dashboard', affix: true },
+    isToken: false
+  },
+  {
+    path: '/admin',
+    component: Layout,
+    redirect: '/admin/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/index'),
+        name: 'Dashboard',
+        meta: { title: '首页', icon: 'dashboard', affix: true }
+      }
+    ],
+    hidden: true
+  },
+  {
+    path: '/category/:id',
+    component: () => import('@/views/home/category'),
+    name: 'CategoryDetail',
+    meta: { title: '分类详情', icon: 'dashboard', affix: false },
+    isToken: false,
+    hidden: true
+  },
+  {
+    path: '/article/:id',
+    component: () => import('@/views/home/article'),
+    name: 'ArticleDetail',
+    meta: { title: '文章详情', icon: 'dashboard', affix: false },
+    isToken: false,
+    hidden: true
+  },
+  {
     path: '/redirect',
     component: Layout,
     hidden: true,
@@ -60,19 +97,6 @@ export const constantRoutes = [
     path: '/401',
     component: () => import('@/views/error/401'),
     hidden: true
-  },
-  {
-    path: '',
-    component: Layout,
-    redirect: 'index',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/index'),
-        name: 'Index',
-        meta: { title: '首页', icon: 'dashboard', affix: true }
-      }
-    ]
   },
   {
     path: '/user',
