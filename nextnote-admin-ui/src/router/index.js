@@ -68,6 +68,14 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/about',
+    component: () => import('@/views/home/about'),
+    name: 'About',
+    meta: { title: '关于', icon: 'dashboard', affix: false },
+    isToken: false,
+    hidden: true
+  },
+  {
     path: '/redirect',
     component: Layout,
     hidden: true,
