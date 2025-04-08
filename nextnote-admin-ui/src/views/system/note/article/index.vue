@@ -13,10 +13,12 @@
           />
 
           <el-tree
+            ref="categoryTree"
             :data="categoryList"
             :props="defaultProps"
             @node-click="handleNodeClick"
             default-expand-all
+            node-key="id"
           >
             <template #default="{ node, data }">
               <div class="custom-tree-node">
@@ -24,15 +26,17 @@
                 <div class="node-content">
                   <i :class="data.type === 'category' ? 'el-icon-folder' : 'el-icon-document'" style="margin-right: 8px"></i>
                   <span v-if="!data.isEditing">{{ node.label }}</span>
-                  <el-input
-                    v-else
-                    v-model="data.name"
-                    size="mini"
-                    @blur="handleNameConfirm(data)"
-                    @keyup.enter.native="handleNameConfirm(data)"
-                    @click.native.stop
-                    ref="nameInput"
-                  ></el-input>
+                  <div v-else class="edit-container">
+                    <el-input
+                      v-model="data.name"
+                      size="mini"
+                      @blur="handleNameConfirm(data)"
+                      @keyup.enter.native="handleNameConfirm(data)"
+                      @click.native.stop
+                      ref="nodeEditInput"
+                      class="el-tree-node__edit-input">
+                    </el-input>
+                  </div>
                 </div>
                 
                 <!-- 右侧操作按钮 -->
@@ -261,18 +265,10 @@ export default {
         .then(() => {
           this.getList();
           this.$modal.msgSuccess("删除成功");
+          //刷新分类树
+          this.getList();
         })
         .catch(() => {});
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download(
-        "note/article/export",
-        {
-          ...this.queryParams,
-        },
-        `article_${new Date().getTime()}.xlsx`
-      );
     },
     // 获取分类列表
     getCategoryList() {
@@ -397,18 +393,89 @@ export default {
         this.$set(data, 'isActive', true);
       }
     },
+    // 修改handleAddArticle方法
+handleAddArticle(category, node) {
+  
+  // 关闭所有正在编辑的节点
+  this.closeAllEditingNodes();
+  
+  // 生成唯一临时ID
+  const tempId = 'new_' + Date.now();
+  
+  // 创建新文章对象（使用Vue.set确保响应式）
+  const newArticle = {
+    id: '',
+    name: '',
+    title: '',
+    category: category.id,
+    type: 'article',
+    isNew: true,
+    isEditing: true // 直接进入编辑状态
+  };
+  
+  // 使用Vue.set确保children数组的响应式更新
+  if (!category.children) {
+    this.$set(category, 'children', []);
+  }
+  this.$set(category, 'children', [newArticle, ...category.children]);
+  
+  // 展开父节点（确保新节点可见）
+  if (!node.expanded) {
+    node.expand();
+  }
+  
+  // 使用nextTick确保DOM更新后操作
+  this.$nextTick(() => {
+    // 通过class查找新添加的输入框
+    const inputs = document.querySelectorAll('.el-tree-node__edit-input');
+    if (inputs.length > 0) {
+      const lastInput = inputs[inputs.length - 1];
+      lastInput.focus();
+      // 添加临时class用于定位
+      lastInput.classList.add('el-tree-node__edit-input');
+    }
+  });
+},
+    
+    // 关闭所有编辑中的节点
+    closeAllEditingNodes() {
+      const closeEditing = (nodes) => {
+        if (!nodes) return;
+        
+        nodes.forEach(node => {
+          if (node.isEditing) {
+            this.$set(node, 'isEditing', false);
+          }
+          if (node.children && node.children.length > 0) {
+            closeEditing(node.children);
+          }
+        });
+      };
+      
+      closeEditing(this.categoryList);
+    },
+    
     // 处理下拉菜单命令
     handleCommand(command, data, node) {
       if (command === 'rename') {
+        // 先关闭其他正在编辑的节点
+        this.closeAllEditingNodes();
+        
         // 使用 Vue.set 或 this.$set 来确保响应式更新
         this.$set(data, 'name', data.title || node.label);
         this.$set(data, 'isEditing', true);
         
+        // 强制更新视图
+        this.$forceUpdate();
+        
+        // 等待DOM更新后聚焦输入框
         this.$nextTick(() => {
-          const inputs = this.$refs.nameInput;
-          if (inputs && inputs.length > 0) {
-            inputs[0].focus();
-          }
+          setTimeout(() => {
+            const editInput = document.querySelector('.edit-container .el-input__inner');
+            if (editInput) {
+              editInput.focus();
+            }
+          }, 100);
         });
       } else if (command === 'delete') {
         this.handleDelete(data);
@@ -445,6 +512,7 @@ export default {
           this.$set(data, 'id', response.data.id);
           this.$set(data, 'isNew', false);
           this.$set(data, 'isEditing', false);
+          this.$set(data, 'isActive', true);
           this.$set(data, 'title', data.name);
         }).catch(() => {
           const parent = this.findParentNode(this.categoryList, data);
@@ -467,6 +535,7 @@ export default {
           this.$modal.msgSuccess("更新成功");
           this.$set(data, 'title', data.name);
           this.$set(data, 'isEditing', false);
+          this.$set(data, 'isActive', true);
         }).catch(() => {
           this.$set(data, 'name', data.title);
           this.$set(data, 'isEditing', false);
@@ -476,29 +545,6 @@ export default {
       }
       
       this.getCategoryList();
-    },
-    // 添加新文章
-    handleAddArticle(category) {
-      const newArticle = {
-        name: '',
-        title: '',
-        category: category.id,
-        type: 'article',
-        isEditing: true,
-        isNew: true
-      };
-      
-      if (!category.children) {
-        category.children = [];
-      }
-      category.children.unshift(newArticle);
-      
-      this.$nextTick(() => {
-        const inputs = this.$refs.nameInput;
-        if (inputs && inputs.length > 0) {
-          inputs[0].focus();
-        }
-      });
     },
     // 查找父节点的辅助方法
     findParentNode(nodes, targetNode) {
@@ -586,5 +632,11 @@ export default {
 /* 下拉菜单样式 */
 .el-dropdown {
   margin-left: 4px;
+}
+
+/* 确保输入框可见 */
+.el-tree-node__edit-input .el-input__inner {
+  width: 80% !important;
+  height: 28px !important;
 }
 </style>
