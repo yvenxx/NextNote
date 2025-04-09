@@ -24,7 +24,14 @@
               <div class="custom-tree-node">
                 <!-- 左侧图标和名称 -->
                 <div class="node-content">
-                  <i :class="data.type === 'category' ? 'el-icon-folder' : 'el-icon-document'" style="margin-right: 8px"></i>
+                  <i
+                    :class="
+                      data.type === 'category'
+                        ? 'el-icon-folder'
+                        : 'el-icon-document'
+                    "
+                    style="margin-right: 8px"
+                  ></i>
                   <span v-if="!data.isEditing">{{ node.label }}</span>
                   <div v-else class="edit-container">
                     <el-input
@@ -34,11 +41,12 @@
                       @keyup.enter.native="handleNameConfirm(data)"
                       @click.native.stop
                       ref="nodeEditInput"
-                      class="el-tree-node__edit-input">
+                      class="el-tree-node__edit-input"
+                    >
                     </el-input>
                   </div>
                 </div>
-                
+
                 <!-- 右侧操作按钮 -->
                 <div class="node-actions" @click.stop>
                   <el-button
@@ -59,8 +67,12 @@
                     </el-button>
                     <template #dropdown>
                       <el-dropdown-menu>
-                        <el-dropdown-item command="rename">重命名</el-dropdown-item>
-                        <el-dropdown-item command="delete">删除</el-dropdown-item>
+                        <el-dropdown-item command="rename"
+                          >重命名</el-dropdown-item
+                        >
+                        <el-dropdown-item command="delete"
+                          >删除</el-dropdown-item
+                        >
                       </el-dropdown-menu>
                     </template>
                   </el-dropdown>
@@ -74,8 +86,14 @@
       <!-- 右侧表单 -->
       <el-col :span="20">
         <div class="right-panel">
-          <el-form ref="form" :model="form" :rules="rules" label-width="80px" v-show="editorVisible">
-            <el-row >
+          <el-form
+            ref="form"
+            :model="form"
+            :rules="rules"
+            label-width="80px"
+            v-show="editorVisible"
+          >
+            <el-row>
               <el-col :span="24">
                 <el-button
                   size="mini"
@@ -339,7 +357,7 @@ export default {
       if (data.isEditing) {
         return;
       }
-      
+
       // 处理节点点击事件，加载对应的文章内容
       if (data.type === "article") {
         this.contentEditor = new Vditor("vditor", {
@@ -350,38 +368,44 @@ export default {
             enable: true,
             position: "right",
           },
-          theme: "ant-design",
-          upload:{
+          cdn: "/static/vditor",
+          preview: {
+            hljs: {
+              lineNumber: true,
+              style: "github-dark",
+            },
+          },
+          upload: {
             accept: "image/jpg,image/jpeg,image/png",
             url: process.env.VUE_APP_BASE_API + "/common/upload-cos",
             fieldName: "file",
             max: 2 * 1024 * 1024,
             headers: {
-              'Authorization': 'Bearer ' + getToken()
+              Authorization: "Bearer " + getToken(),
             },
             linkToImgUrl: process.env.VUE_APP_BASE_API + "/common/upload-cos",
-            filename(name){
+            filename(name) {
               return name;
             },
-            format(files,responseText){
+            format(files, responseText) {
               // 上传成功后，将图片回显到编辑器中
               let response = JSON.parse(responseText);
-              if(response.code == 200){
+              if (response.code == 200) {
                 return JSON.stringify({
                   msg: response.msg,
                   code: response.code,
-                  data:{
+                  data: {
                     errFiles: [],
-                    succMap:{
-                      [response.newFileName]: response.url
-                    }
-                  }
+                    succMap: {
+                      [response.newFileName]: response.url,
+                    },
+                  },
                 });
-              }else{
+              } else {
                 this.$message.error(response.msg);
               }
             },
-          }
+          },
         });
         getArticle(data.id).then((response) => {
           this.contentEditor.setValue(response.data.description || "");
@@ -390,94 +414,95 @@ export default {
         this.form.description = data.description;
         this.editorVisible = true;
         // 当前节点颜色标识
-        this.$set(data, 'isActive', true);
+        this.$set(data, "isActive", true);
       }
     },
     // 修改handleAddArticle方法
-handleAddArticle(category, node) {
-  
-  // 关闭所有正在编辑的节点
-  this.closeAllEditingNodes();
-  
-  // 生成唯一临时ID
-  const tempId = 'new_' + Date.now();
-  
-  // 创建新文章对象（使用Vue.set确保响应式）
-  const newArticle = {
-    id: '',
-    name: '',
-    title: '',
-    category: category.id,
-    type: 'article',
-    isNew: true,
-    isEditing: true // 直接进入编辑状态
-  };
-  
-  // 使用Vue.set确保children数组的响应式更新
-  if (!category.children) {
-    this.$set(category, 'children', []);
-  }
-  this.$set(category, 'children', [newArticle, ...category.children]);
-  
-  // 展开父节点（确保新节点可见）
-  if (!node.expanded) {
-    node.expand();
-  }
-  
-  // 使用nextTick确保DOM更新后操作
-  this.$nextTick(() => {
-    // 通过class查找新添加的输入框
-    const inputs = document.querySelectorAll('.el-tree-node__edit-input');
-    if (inputs.length > 0) {
-      const lastInput = inputs[inputs.length - 1];
-      lastInput.focus();
-      // 添加临时class用于定位
-      lastInput.classList.add('el-tree-node__edit-input');
-    }
-  });
-},
-    
+    handleAddArticle(category, node) {
+      // 关闭所有正在编辑的节点
+      this.closeAllEditingNodes();
+
+      // 生成唯一临时ID
+      const tempId = "new_" + Date.now();
+
+      // 创建新文章对象（使用Vue.set确保响应式）
+      const newArticle = {
+        id: "",
+        name: "",
+        title: "",
+        category: category.id,
+        type: "article",
+        isNew: true,
+        isEditing: true, // 直接进入编辑状态
+      };
+
+      // 使用Vue.set确保children数组的响应式更新
+      if (!category.children) {
+        this.$set(category, "children", []);
+      }
+      this.$set(category, "children", [newArticle, ...category.children]);
+
+      // 展开父节点（确保新节点可见）
+      if (!node.expanded) {
+        node.expand();
+      }
+
+      // 使用nextTick确保DOM更新后操作
+      this.$nextTick(() => {
+        // 通过class查找新添加的输入框
+        const inputs = document.querySelectorAll(".el-tree-node__edit-input");
+        if (inputs.length > 0) {
+          const lastInput = inputs[inputs.length - 1];
+          lastInput.focus();
+          // 添加临时class用于定位
+          lastInput.classList.add("el-tree-node__edit-input");
+        }
+      });
+    },
+
     // 关闭所有编辑中的节点
     closeAllEditingNodes() {
       const closeEditing = (nodes) => {
         if (!nodes) return;
-        
-        nodes.forEach(node => {
+
+        nodes.forEach((node) => {
           if (node.isEditing) {
-            this.$set(node, 'isEditing', false);
+            this.$set(node, "isEditing", false);
           }
           if (node.children && node.children.length > 0) {
             closeEditing(node.children);
           }
         });
       };
-      
+
       closeEditing(this.categoryList);
     },
-    
+
     // 处理下拉菜单命令
     handleCommand(command, data, node) {
-      if (command === 'rename') {
+      if (command === "rename") {
         // 先关闭其他正在编辑的节点
         this.closeAllEditingNodes();
-        
+
         // 使用 Vue.set 或 this.$set 来确保响应式更新
-        this.$set(data, 'name', data.title || node.label);
-        this.$set(data, 'isEditing', true);
-        
+        this.$set(data, "name", data.title || node.label);
+        this.$set(data, "isEditing", true);
+
         // 强制更新视图
         this.$forceUpdate();
-        
+
         // 等待DOM更新后聚焦输入框
         this.$nextTick(() => {
           setTimeout(() => {
-            const editInput = document.querySelector('.edit-container .el-input__inner');
+            const editInput = document.querySelector(
+              ".edit-container .el-input__inner"
+            );
             if (editInput) {
               editInput.focus();
             }
           }, 100);
         });
-      } else if (command === 'delete') {
+      } else if (command === "delete") {
         this.handleDelete(data);
       }
     },
@@ -488,62 +513,68 @@ handleAddArticle(category, node) {
         return;
       }
 
-      if (!data.name || data.name.trim() === '') {
+      if (!data.name || data.name.trim() === "") {
         this.$modal.msgError("名称不能为空");
         return;
       }
 
       // 如果名称没有改变，直接关闭编辑状态
       if (data.name === data.title) {
-        this.$set(data, 'isEditing', false);
+        this.$set(data, "isEditing", false);
         return;
       }
 
-      this.$set(data, 'isSubmitting', true);
+      this.$set(data, "isSubmitting", true);
 
       if (data.isNew) {
         // 处理新添加的文章
         const params = {
           title: data.name,
-          category: data.category
+          category: data.category,
         };
-        addArticle(params).then(response => {
-          this.$modal.msgSuccess("添加成功");
-          this.$set(data, 'id', response.data.id);
-          this.$set(data, 'isNew', false);
-          this.$set(data, 'isEditing', false);
-          this.$set(data, 'isActive', true);
-          this.$set(data, 'title', data.name);
-        }).catch(() => {
-          const parent = this.findParentNode(this.categoryList, data);
-          if (parent && parent.children) {
-            const index = parent.children.findIndex(item => item === data);
-            if (index !== -1) {
-              parent.children.splice(index, 1);
+        addArticle(params)
+          .then((response) => {
+            this.$modal.msgSuccess("添加成功");
+            this.$set(data, "id", response.data.id);
+            this.$set(data, "isNew", false);
+            this.$set(data, "isEditing", false);
+            this.$set(data, "isActive", true);
+            this.$set(data, "title", data.name);
+          })
+          .catch(() => {
+            const parent = this.findParentNode(this.categoryList, data);
+            if (parent && parent.children) {
+              const index = parent.children.findIndex((item) => item === data);
+              if (index !== -1) {
+                parent.children.splice(index, 1);
+              }
             }
-          }
-        }).finally(() => {
-          this.$set(data, 'isSubmitting', false);
-        });
+          })
+          .finally(() => {
+            this.$set(data, "isSubmitting", false);
+          });
       } else {
         // 处理重命名
         const params = {
           id: data.id,
-          title: data.name
+          title: data.name,
         };
-        updateArticle(params).then(() => {
-          this.$modal.msgSuccess("更新成功");
-          this.$set(data, 'title', data.name);
-          this.$set(data, 'isEditing', false);
-          this.$set(data, 'isActive', true);
-        }).catch(() => {
-          this.$set(data, 'name', data.title);
-          this.$set(data, 'isEditing', false);
-        }).finally(() => {
-          this.$set(data, 'isSubmitting', false);
-        });
+        updateArticle(params)
+          .then(() => {
+            this.$modal.msgSuccess("更新成功");
+            this.$set(data, "title", data.name);
+            this.$set(data, "isEditing", false);
+            this.$set(data, "isActive", true);
+          })
+          .catch(() => {
+            this.$set(data, "name", data.title);
+            this.$set(data, "isEditing", false);
+          })
+          .finally(() => {
+            this.$set(data, "isSubmitting", false);
+          });
       }
-      
+
       this.getCategoryList();
     },
     // 查找父节点的辅助方法
@@ -558,7 +589,7 @@ handleAddArticle(category, node) {
         }
       }
       return null;
-    }
+    },
   },
   mounted() {},
 };
