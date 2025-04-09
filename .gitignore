@@ -32,7 +32,7 @@ rebel.xml
 nbproject/private/
 build/*
 nbbuild/
-dist/
+nextnote-admin-ui/dist/
 nbdist/
 .nb-gradle/
 
@@ -45,3 +45,4 @@ nbdist/
 !*/build/*.java
 !*/build/*.html
 !*/build/*.xml
+/nextnote-admin-ui/dist.zip
