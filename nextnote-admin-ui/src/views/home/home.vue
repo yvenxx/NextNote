@@ -25,7 +25,7 @@
         >
           <div class="post-category">{{ categories.find(category => category.id === article.category).name }}</div>
           <a class="post-title" :href="'/article/' + article.id">{{ article.title }}</a>
-          <div class="post-content" v-html="article.content"></div>
+          <div class="post-content" v-html="truncateContent(article.content)"></div>
           <a class="read-more" :href="'/article/' + article.id">继续阅读</a>
           <div class="post-meta">
             <span class="post-author"><i class="el-icon-user"></i>&nbsp;{{ article.createBy }}&nbsp;/&nbsp;</span>
@@ -144,6 +144,16 @@ export default {
       this.fetchArticle(val);
       // 滚动到页面顶部
       window.scrollTo(0, 0);
+    },
+    truncateContent(content) {
+      // 移除HTML标签
+      if (content) {
+        const plainText = content.replace(/<[^>]+>/g, '');
+        // 截取前200个字符，如果超出则添加省略号
+        return plainText.length > 200 ? plainText.slice(0, 200) + '...' : plainText;
+      } else {
+        return '';
+      }
     }
   },
   created() {
@@ -254,5 +264,10 @@ export default {
   text-align: center;
   margin-top: 20px;
   margin-bottom: 20px;
+}
+.post-content {
+  margin: 1rem 0;
+  line-height: 1.6;
+  color: #666;
 }
 </style>

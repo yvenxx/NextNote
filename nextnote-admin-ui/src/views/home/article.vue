@@ -33,6 +33,10 @@
 import { getArticleById } from '@/api/note/home'
 import AppHeader from "@/components/Header.vue";
 import AppFooter from "@/components/Footer.vue";
+import { marked } from 'marked';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism.min.css';
+
 export default {
   data() {
     return {
@@ -56,13 +60,17 @@ export default {
     getArticle(articleId) {
       getArticleById(articleId).then(response => {
         this.article = response.data;
-        // 文章加载完成后生成大纲
+        if (this.article.description) {
+          this.article.content = marked(this.article.description);
+        }
         this.$nextTick(() => {
           this.generateOutline();
+          Prism.highlightAll();
+          // 为代码块添加复制按钮
+          this.addCopyButtons();
         });
       })
     },
-    
     // 生成文章大纲
     generateOutline() {
       // 获取文章内容区域
@@ -89,66 +97,79 @@ export default {
         });
       });
     },
-    
     // 滚动到指定标题
     scrollToHeading(id) {
       const element = document.getElementById(id);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
+    },
+    // 添加复制按钮方法
+    addCopyButtons() {
+      const codeBlocks = document.querySelectorAll('pre code');
+      codeBlocks.forEach(codeBlock => {
+        const pre = codeBlock.parentElement;
+        // 创建复制按钮容器
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'copy-button-container';
+        // 创建复制按钮
+        const copyButton = document.createElement('button');
+        copyButton.className = 'copy-button';
+        copyButton.innerHTML = '复制';
+        
+        // 添加点击事件
+        copyButton.addEventListener('click', () => {
+          const code = codeBlock.textContent;
+          navigator.clipboard.writeText(code).then(() => {
+            copyButton.innerHTML = '已复制!';
+            setTimeout(() => {
+              copyButton.innerHTML = '复制';
+            }, 2000);
+          }).catch(err => {
+            console.error('复制失败:', err);
+            copyButton.innerHTML = '复制失败';
+          });
+        });
+        
+        buttonContainer.appendChild(copyButton);
+        pre.appendChild(buttonContainer);
+      });
     }
   }
 }
 </script>
 
-<style scoped>
-.home-container {
-  min-height: 100vh;
-  background-color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-.main-container {
-  width: 100%;
-  margin: 0 auto;
-  margin-top: 20px;
-  padding: 2rem 0;
-}
-.article-content{
-  border-right: 1px solid #eee;
-}
-.article-outline {
-  position: sticky;
-  top: 20px;
-  padding: 15px;
-  margin-bottom: 20px;
+<style>
+/* 添加到 style 标签中，注意要移除 scoped 属性以使样式全局生效 */
+pre {
+  position: relative;
 }
 
-.outline-list {
-  list-style: none;
-  padding-left: 0;
+.copy-button-container {
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }
 
-.outline-item {
-  margin: 8px 0;
+.copy-button {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.outline-item a {
-  color: #333;
-  text-decoration: none;
-  transition: color 0.3s;
+.copy-button:hover {
+  background-color: #e9ecef;
+  color: #495057;
 }
 
-.outline-item a:hover {
-  color: #409EFF;
+/* 确保代码块有足够的右边距来放置按钮 */
+pre code {
+  padding-right: 60px !important;
 }
-
-/* 不同级别标题的缩进 */
-.level-1 { padding-left: 0; }
-.level-2 { padding-left: 10px; }
-.level-3 { padding-left: 20px; }
-.level-4 { padding-left: 30px; }
-.level-5 { padding-left: 40px; }
-.level-6 { padding-left: 50px; }
-
 </style>
 

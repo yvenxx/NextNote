@@ -2,6 +2,7 @@ package cn.yven.note.service.impl;
 
 import java.util.List;
 import cn.yven.common.utils.DateUtils;
+import cn.yven.common.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import cn.yven.note.mapper.TArticleMapper;
@@ -54,6 +55,7 @@ public class TArticleServiceImpl implements ITArticleService
     public int insertTArticle(TArticle tArticle)
     {
         tArticle.setCreateTime(DateUtils.getNowDate());
+        tArticle.setCreateBy(SecurityUtils.getUsername());
         return tArticleMapper.insertTArticle(tArticle);
     }
 
