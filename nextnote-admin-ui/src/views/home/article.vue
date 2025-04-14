@@ -115,19 +115,19 @@ export default {
         // 创建复制按钮
         const copyButton = document.createElement('button');
         copyButton.className = 'copy-button';
-        copyButton.innerHTML = '复制';
+        copyButton.innerHTML = 'copy';
         
         // 添加点击事件
         copyButton.addEventListener('click', () => {
           const code = codeBlock.textContent;
           navigator.clipboard.writeText(code).then(() => {
-            copyButton.innerHTML = '已复制!';
+            copyButton.innerHTML = 'copied!';
             setTimeout(() => {
-              copyButton.innerHTML = '复制';
+              copyButton.innerHTML = 'copy';
             }, 2000);
           }).catch(err => {
-            console.error('复制失败:', err);
-            copyButton.innerHTML = '复制失败';
+            console.error('copy failed:', err);
+            copyButton.innerHTML = 'copy failed!';
           });
         });
         
